@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD Sinh Viên - MockAPI</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        img {
+            width: 50px;
+            border-radius: 50%;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 6px;
+            margin: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Quản Lý Sinh Viên</h2>
+    <h4>Lê Đỗ Duy Phúc</h4>
+    <h4>Đỗ Tô Thanh Danh</h4>
+    <h4>Trần Huy An</h4>
+    <h4>Nguyễn Tiến Đạt</h4>
+    <h4>Lý Tuấn Đức</h4>
+    <h4>Hồ Bảo Khang</h4>
+
+    <input type="hidden" id="id">
+
+    <input type="text" id="name" placeholder="Tên sinh viên">
+    <input type="text" id="address" placeholder="Địa chỉ">
+    <input type="text" id="avatar" placeholder="Link avatar">
+
+    <br>
+    <button onclick="addSinhVien()">Thêm</button>
+    <button onclick="updateSinhVien()">Cập nhật</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Avatar</th>
+                <th>Tên</th>
+                <th>Địa chỉ</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody id="data"></tbody>
+    </table>
+
+    <script>
+        const API_URL = "https://6982f3679c3efeb892a3d102.mockapi.io/sinhvien";
+
+        // Load danh sách
+        function loadSinhVien() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    let html = "";
+                    data.forEach(sv => {
+                        html += `
+          <tr>
+            <td>${sv.id}</td>
+            <td><img src="${sv.avatar}"></td>
+            <td>${sv.name}</td>
+            <td>${sv.address}</td>
+            <td>
+              <button onclick="editSinhVien(${sv.id})">Sửa</button>
+              <button onclick="deleteSinhVien(${sv.id})">Xóa</button>
+            </td>
+          </tr>
+        `;
+                    });
+                    document.getElementById("data").innerHTML = html;
+                });
+        }
+
+        // Thêm
+        function addSinhVien() {
+            const sv = {
+                name: document.getElementById("name").value,
+                address: document.getElementById("address").value,
+                avatar: document.getElementById("avatar").value
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(sv)
+            })
+                .then(() => {
+                    clearForm();
+                    loadSinhVien();
+                });
+        }
+
+        // Lấy dữ liệu lên form
+        function editSinhVien(id) {
+            fetch(`${API_URL}/${id}`)
+                .then(res => res.json())
+                .then(sv => {
+                    document.getElementById("id").value = sv.id;
+                    document.getElementById("name").value = sv.name;
+                    document.getElementById("address").value = sv.address;
+                    document.getElementById("avatar").value = sv.avatar;
+                });
+        }
+
+        // Cập nhật
+        function updateSinhVien() {
+            const id = document.getElementById("id").value;
+
+            const sv = {
+                name: document.getElementById("name").value,
+                address: document.getElementById("address").value,
+                avatar: document.getElementById("avatar").value
+            };
+
+            fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(sv)
+            })
+                .then(() => {
+                    clearForm();
+                    loadSinhVien();
+                });
+        }
+
+        // Xóa
+        function deleteSinhVien(id) {
+            if (!confirm("Bạn có chắc muốn xóa?")) return;
+
+            fetch(`${API_URL}/${id}`, {
+                method: "DELETE"
+            })
+                .then(() => loadSinhVien());
+        }
+
+        function clearForm() {
+            document.getElementById("id").value = "";
+            document.getElementById("name").value = "";
+            document.getElementById("address").value = "";
+            document.getElementById("avatar").value = "";
+        }
+
+        loadSinhVien();
+    </script>
+
+</body>
+
+</html>
